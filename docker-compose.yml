@@ -1,0 +1,6 @@
+services:
+  go_db:
+    image: gopro
+    build: .
+    ports:
+      - "8080:8080"
