@@ -1,6 +1,6 @@
 # Go-DB
 this project is a simple key-value database. 
-- it uses Gin frame work as a backbone for the web server which is a light weight and fast.
+- it uses `Gin framework` as a backbone for the web server which is a light weight and fast.
 - for the persistence and data storage there is a module named `Badger` it helps in storing and retrieving stored data in an efficient way
 
 ## project overview 
