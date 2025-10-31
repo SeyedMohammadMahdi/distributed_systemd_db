@@ -67,6 +67,48 @@ func main() {
 		c.JSON(http.StatusOK, response)
 	})
 
+
+	router.GET("/objects", func(c *gin.Context) {
+		var result []gin.H
+		err := db.View(func(txn *badger.Txn) error {
+			it := txn.NewIterator(badger.DefaultIteratorOptions)
+			defer it.Close()
+
+			for it.Rewind(); it.Valid(); it.Next() {
+				item := it.Item()
+				key := item.Key()
+				
+				var valCopy []byte
+
+				err := item.Value(func(val []byte) error {
+					valCopy = append(valCopy, val...)
+					return nil
+				})
+
+				if err != nil {
+					return err
+				}
+
+				var decode any 
+				if err := json.Unmarshal(valCopy ,&decode); err != nil {
+					return err
+				}
+
+				result = append(result, gin.H{
+					"key": string(key),
+					"value": decode,
+				})
+			}
+			return nil
+		})
+
+		if err != nil {
+			c.Status(http.StatusBadRequest)
+			return
+		}
+
+		c.JSON(http.StatusOK, result)
+	})
 	
 	router.PUT("/objects", func(c *gin.Context) {
 		var data Data
