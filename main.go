@@ -10,7 +10,7 @@ package main
 import (
 	// "bytes"
 	// "encoding/json"
-	"fmt"
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -46,12 +46,16 @@ func main() {
 			}
 
 			// var err error
-			response, err = item.ValueCopy(nil)
+			respByte, err := item.ValueCopy(nil)
 
 			if err != nil {
 				return err
 			}
 
+			if err:= json.Unmarshal(respByte, &response); err != nil {
+				return err
+			}
+			
 			return nil
 		})
 
@@ -73,8 +77,31 @@ func main() {
 			c.Status(400)
 			return
 		}
-		fmt.Println(data.Value)
 
+		d, err := json.Marshal(data.Value)
+
+		if err != nil {
+			c.Status(http.StatusBadRequest)
+			return
+		}
+
+		err = db.Update(func(txn *badger.Txn) error {
+
+			err := txn.Set([]byte(data.Key), d)
+			if err != nil {
+				return err
+			}
+			return nil
+		})
+
+		if err != nil {
+			c.Status(http.StatusBadRequest)
+			return
+		}
+
+		c.Status(http.StatusOK)
+		// fmt.Println(d)
+		// c.Status(http.StatusOK)
 		// var pretty bytes.Buffer
 		// if err := json.Indent(&pretty, data.Value, "", "  "); err != nil {
 		// 	// fallback if raw JSON is invalid
