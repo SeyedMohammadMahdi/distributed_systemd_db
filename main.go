@@ -1,19 +1,16 @@
-//   ____ ___ _   _       ____  ____
-//  / ___|_ _| \ | |     |  _ \| __ )
-// | |  _ | ||  \| |_____| | | |  _ \
-// | |_| || || |\  |_____| |_| | |_) |
-//  \____|___|_| \_|     |____/|____/
-
+//   ____ _                 ____  ____
+//  / ___(_)_ __           |  _ \| __ )
+// | |  _| | '_ \   _____  | | | |  _ \
+// | |_| | | | | | |_____| | |_| | |_) |
+//  \____|_|_| |_|         |____/|____/
 // this project is going to implement a simple database using gin framework as the webserver backbone
+
 package main
 
 import (
-	// "bytes"
-	// "encoding/json"
 	"encoding/json"
 	"log"
 	"net/http"
-
 	"github.com/dgraph-io/badger/v4"
 	"github.com/gin-gonic/gin"
 )
@@ -55,7 +52,7 @@ func main() {
 			if err:= json.Unmarshal(respByte, &response); err != nil {
 				return err
 			}
-			
+
 			return nil
 		})
 
@@ -100,15 +97,6 @@ func main() {
 		}
 
 		c.Status(http.StatusOK)
-		// fmt.Println(d)
-		// c.Status(http.StatusOK)
-		// var pretty bytes.Buffer
-		// if err := json.Indent(&pretty, data.Value, "", "  "); err != nil {
-		// 	// fallback if raw JSON is invalid
-		// 	fmt.Printf("Key: %s, Value (raw): %s\n", data.Key, string(data.Value))
-		// } else {
-		// 	fmt.Printf("Key: %s\nValue:\n%s\n\n", data.Key, pretty.String())
-		// }
 
 	})
 
