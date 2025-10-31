@@ -109,10 +109,13 @@ Content-Length: 18
 
 
 ### adding data to the database
-![[Pasted image 20251031164555.png]]
+<img width="1366" height="612" alt="image" src="https://github.com/user-attachments/assets/b8e6435c-752d-46ae-9b43-4ef86f5b12d6" />
+
 
 ### getting all datas stored in database
-![[Pasted image 20251031164659.png]]
+<img width="1366" height="608" alt="image" src="https://github.com/user-attachments/assets/dbd2c813-f54b-4a52-92c5-16fa89642873" />
+
 
 ### getting a single data
-![[Pasted image 20251031164759.png]]
+<img width="1361" height="594" alt="image" src="https://github.com/user-attachments/assets/fe673237-5b21-404d-a56a-516cd3fcfc2f" />
+
