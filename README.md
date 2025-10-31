@@ -106,3 +106,13 @@ Content-Length: 18
   }
 ]
 ```
+
+
+### adding data to the database
+![[Pasted image 20251031164555.png]]
+
+### getting all datas stored in database
+![[Pasted image 20251031164659.png]]
+
+### getting a single data
+![[Pasted image 20251031164759.png]]
