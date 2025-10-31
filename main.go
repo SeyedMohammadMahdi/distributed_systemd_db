@@ -58,10 +58,11 @@ func main() {
 
 		if err == badger.ErrKeyNotFound {
 			// c.Status(http.StatusNotFound)
-			c.JSON(http.StatusNotFound, gin.H{
-				"message": "not found",
-				"id": id,
-			})
+			// c.JSON(http.StatusNotFound, gin.H{
+			// 	"message": "not found",
+			// 	"id": id,
+			// })
+			c.Status(http.StatusNotFound)
 			return
 		}
 		c.JSON(http.StatusOK, response)
@@ -104,6 +105,11 @@ func main() {
 
 		if err != nil {
 			c.Status(http.StatusBadRequest)
+			return
+		}
+
+		if len(result) == 0 {
+			c.Status(http.StatusNotFound)
 			return
 		}
 
