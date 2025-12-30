@@ -8,20 +8,24 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"log"
+	"net"
 	"net/http"
+	grpc_util "simple_db/grpc"
+
 	"github.com/dgraph-io/badger/v4"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
 )
 
 type Data struct {
-	Key   string          `json:"key" binding:"required"`
-	Value any `json:"value" binding:"required"`
+	Key   string `json:"key" binding:"required"`
+	Value any    `json:"value" binding:"required"`
 }
 
 func main() {
-
 	db, err := badger.Open(badger.DefaultOptions("./data"))
 	if err != nil {
 		log.Fatal(err)
@@ -49,7 +53,7 @@ func main() {
 				return err
 			}
 
-			if err:= json.Unmarshal(respByte, &response); err != nil {
+			if err := json.Unmarshal(respByte, &response); err != nil {
 				return err
 			}
 
@@ -68,7 +72,6 @@ func main() {
 		c.JSON(http.StatusOK, response)
 	})
 
-
 	router.GET("/objects", func(c *gin.Context) {
 		var result []gin.H
 		err := db.View(func(txn *badger.Txn) error {
@@ -78,7 +81,7 @@ func main() {
 			for it.Rewind(); it.Valid(); it.Next() {
 				item := it.Item()
 				key := item.Key()
-				
+
 				var valCopy []byte
 
 				err := item.Value(func(val []byte) error {
@@ -90,13 +93,13 @@ func main() {
 					return err
 				}
 
-				var decode any 
-				if err := json.Unmarshal(valCopy ,&decode); err != nil {
+				var decode any
+				if err := json.Unmarshal(valCopy, &decode); err != nil {
 					return err
 				}
 
 				result = append(result, gin.H{
-					"key": string(key),
+					"key":   string(key),
 					"value": decode,
 				})
 			}
@@ -115,7 +118,7 @@ func main() {
 
 		c.JSON(http.StatusOK, result)
 	})
-	
+
 	router.PUT("/objects", func(c *gin.Context) {
 		var data Data
 		if err := c.ShouldBindJSON(&data); err != nil {
@@ -147,6 +150,32 @@ func main() {
 		c.Status(http.StatusOK)
 
 	})
-
+	go WriteOp()
 	router.Run()
+}
+
+type server struct {
+	grpc_util.UnimplementedPutLogServer
+}
+
+func (s *server) WriteOp(ctx context.Context, in *grpc_util.Operation) (*grpc_util.Status, error) {
+	return &grpc_util.Status{Status: 0}, nil
+}
+
+func WriteOp() {
+	lis, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		log.Fatalf("failed to listen to 50051 for grpc: %v", err)
+	}
+	defer lis.Close()
+	s := grpc.NewServer()
+	grpc_util.RegisterPutLogServer(s, &server{})
+	log.Println("listening for grpc requests...")
+	if err := s.Serve(lis); err != nil {
+		log.Fatal("failed to serve")
+	}
+}
+
+func PutOp(key string, _value string) {
+
 }
