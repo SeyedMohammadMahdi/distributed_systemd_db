@@ -158,7 +158,7 @@ type server struct {
 	grpc_util.UnimplementedPutLogServer
 }
 
-func (s *server) WriteOp(ctx context.Context, in *grpc_util.Operation) (*grpc_util.Status, error) {
+func (s *server) PutOperation(ctx context.Context, in *grpc_util.Operation) (*grpc_util.Status, error) {
 	return &grpc_util.Status{Status: 0}, nil
 }
 
