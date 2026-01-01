@@ -239,8 +239,9 @@ func main() {
 
 	//check the role of the node if it is master or backup
 	// if the node is master then we have
-
-	router.Run()
+	if role {
+		router.Run()
+	}
 }
 
 type server struct {
