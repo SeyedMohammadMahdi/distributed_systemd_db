@@ -32,6 +32,7 @@ type Data struct {
 var (
 	address []string
 	role    bool
+	db      *badger.DB
 )
 
 func init() {
@@ -53,13 +54,15 @@ func init() {
 		log.Fatalln(err)
 	}
 
+	db, err = badger.Open(badger.DefaultOptions("./data"))
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 }
 
 func main() {
-	db, err := badger.Open(badger.DefaultOptions("./data"))
-	if err != nil {
-		log.Fatal(err)
-	}
+
 	defer db.Close()
 
 	var c1 grpc_util.PutLogClient
@@ -245,7 +248,24 @@ type server struct {
 }
 
 func (s *server) PutOperation(ctx context.Context, in *grpc_util.Operation) (*grpc_util.Status, error) {
-	log.Println(in.Key, in.Value)
+	// to test if the setup is working in syncronous way uncomment the following line
+	// what you should expect is that until the backup server do not write the data in the data base and respond with success the master won't write it
+	// return &grpc_util.Status{Status: 1}, nil
+	d, err := json.Marshal(in.GetValue())
+	if err != nil {
+		return &grpc_util.Status{Status: 1}, nil
+	}
+	err = db.Update(func(txn *badger.Txn) error {
+		err := txn.Set([]byte(in.GetKey()), d)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return &grpc_util.Status{Status: 1}, nil
+	}
+	log.Println("done")
 	return &grpc_util.Status{Status: 0}, nil
 }
 
