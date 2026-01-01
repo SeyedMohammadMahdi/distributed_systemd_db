@@ -150,7 +150,7 @@ func main() {
 		c.Status(http.StatusOK)
 
 	})
-	go WriteOp()
+	go BackupServerLogRecServer()
 	router.Run()
 }
 
@@ -159,10 +159,11 @@ type server struct {
 }
 
 func (s *server) PutOperation(ctx context.Context, in *grpc_util.Operation) (*grpc_util.Status, error) {
+	log.Println(in.Key, in.Value)
 	return &grpc_util.Status{Status: 0}, nil
 }
 
-func WriteOp() {
+func BackupServerLogRecServer() {
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatalf("failed to listen to 50051 for grpc: %v", err)
@@ -177,5 +178,5 @@ func WriteOp() {
 }
 
 func PutOp(key string, _value string) {
-
+	
 }
