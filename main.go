@@ -13,16 +13,46 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	grpc_util "simple_db/grpc"
+	"strconv"
+	"strings"
 
 	"github.com/dgraph-io/badger/v4"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Data struct {
 	Key   string `json:"key" binding:"required"`
 	Value any    `json:"value" binding:"required"`
+}
+
+var (
+	address []string
+	role    bool
+)
+
+func init() {
+	addr, ok := os.LookupEnv("NODES")
+	if !ok || addr == "" {
+		log.Fatalln("could not initiate the NODES")
+	}
+
+	address = strings.Split(addr, ",")
+	rl, ok := os.LookupEnv("ROLE")
+
+	if !ok || rl == "" {
+		log.Fatalln("could not get role from environment")
+	}
+
+	var err error
+	role, err = strconv.ParseBool(rl)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 }
 
 func main() {
@@ -31,6 +61,30 @@ func main() {
 		log.Fatal(err)
 	}
 	defer db.Close()
+
+	var c1 grpc_util.PutLogClient
+	var c2 grpc_util.PutLogClient
+	if !role {
+		go BackupServerLogRecServer()
+	} else {
+		conn1, err := grpc.NewClient(address[0], grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			log.Fatalln("could not connect to backup server grpc")
+		}
+
+		defer conn1.Close()
+
+		c1 = grpc_util.NewPutLogClient(conn1)
+
+		conn2, err := grpc.NewClient(address[1], grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			log.Fatalln("could not connect to backup server grpc")
+		}
+
+		defer conn2.Close()
+
+		c2 = grpc_util.NewPutLogClient(conn2)
+	}
 
 	router := gin.Default()
 
@@ -133,6 +187,35 @@ func main() {
 			return
 		}
 
+		res1, err := c1.PutOperation(context.Background(), &grpc_util.Operation{
+			Key:   data.Key,
+			Value: string(d),
+		})
+		if err != nil {
+			c.Status(http.StatusConflict)
+			return
+		}
+
+		if res1.GetStatus() != 0 {
+			c.Status(http.StatusConflict)
+			return
+		}
+
+		res2, err := c2.PutOperation(context.Background(), &grpc_util.Operation{
+			Key:   data.Key,
+			Value: string(d),
+		})
+
+		if err != nil {
+			c.Status(http.StatusConflict)
+			return
+		}
+
+		if res2.GetStatus() != 0 {
+			c.Status(http.StatusConflict)
+			return
+		}
+
 		err = db.Update(func(txn *badger.Txn) error {
 
 			err := txn.Set([]byte(data.Key), d)
@@ -150,7 +233,10 @@ func main() {
 		c.Status(http.StatusOK)
 
 	})
-	go BackupServerLogRecServer()
+
+	//check the role of the node if it is master or backup
+	// if the node is master then we have
+
 	router.Run()
 }
 
@@ -175,8 +261,4 @@ func BackupServerLogRecServer() {
 	if err := s.Serve(lis); err != nil {
 		log.Fatal("failed to serve")
 	}
-}
-
-func PutOp(key string, _value string) {
-	
 }

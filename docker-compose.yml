@@ -1,6 +1,24 @@
 services:
-  go_db:
+  go_master:
     image: gopro
     build: .
     ports:
       - "8080:8080"
+    environment:
+      - NODES=replica1:50051,replica2:50051
+      - ROLE=true
+    depends_on:
+      - replica1
+      - replica2
+  replica1:
+    image: gopro
+    build: .
+    environment:
+      - NODES=replica1:50051,replica2:50051
+      - ROLE=false
+  replica2:
+    image: gopro
+    build: .
+    environment:
+      - NODES=replica1:50051,replica2:50051
+      - ROLE=false

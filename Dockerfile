@@ -1,5 +1,5 @@
 # Step 1: Build stage
-FROM golang:1.25 AS builder
+FROM docker.arvancloud.ir/golang:1.25 AS builder
 
 # Set the current working directory inside the container
 WORKDIR /app
@@ -17,7 +17,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o myapp .
 
 # Step 2: Final stage
-FROM alpine:latest
+FROM docker.arvancloud.ir/alpine:latest
 
 # Set the working directory for the final image
 WORKDIR /root/
