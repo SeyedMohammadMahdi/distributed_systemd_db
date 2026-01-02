@@ -3,6 +3,10 @@ this project is a simple key-value database.
 - it uses `Gin framework` as a backbone for the web server which is a light weight and fast.
 - for the persistence and data storage there is a module named `Badger` it helps in storing and retrieving stored data in an efficient way
 
+
+## news
+- added replication
+
 ## project overview 
 
 this project contains 3 routes:
@@ -19,6 +23,18 @@ this project contains 3 routes:
 ## setup
 
 for running the project the only thing you need to do is having docker and docker-compose on you system and follow the instructions below:
+
+the environment variable for the setting of the project are found in the .env file
+```bash
+NODES=replica1:50051,replica2:50051
+ROLE1=true
+ROLE2=false
+ROLE3=false
+TEST=true
+```
+- the NODES is the list of replicas (only replicas not master) grpc endpoint and it must contain only 2 endpoint not less, not more
+- the ROLE1-3 define the role of each 3 instances in this setup the first node is master and 2 others are replicas
+- the TEST variable defines weather the backup replicas to accept direct request or not for testing purposes
 
 
 building the docker image:
