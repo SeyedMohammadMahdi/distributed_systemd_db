@@ -5,8 +5,9 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - NODES=replica1:50051,replica2:50051
-      - ROLE=true
+      - NODES=${NODES}
+      - ROLE=${ROLE1}
+      - TEST=${TEST}
     depends_on:
       - replica1
       - replica2
@@ -14,15 +15,17 @@ services:
     image: gopro
     build: .
     environment:
-      - NODES=replica1:50051,replica2:50051
-      - ROLE=false
+      - NODES=${NODES}
+      - ROLE=${ROLE2}
+      - TEST=${TEST}
     ports:
       - "8081:8080"
   replica2:
     image: gopro
     build: .
     environment:
-      - NODES=replica1:50051,replica2:50051
-      - ROLE=false
+      - NODES=${NODES}
+      - ROLE=${ROLE3}
+      - TEST=${TEST}
     ports:
       - "8082:8080"

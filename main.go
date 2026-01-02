@@ -17,6 +17,7 @@ import (
 	grpc_util "simple_db/grpc"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/dgraph-io/badger/v4"
@@ -34,6 +35,7 @@ var (
 	address []string
 	role    bool
 	db      *badger.DB
+	test    bool = false
 )
 
 func init() {
@@ -50,6 +52,11 @@ func init() {
 	}
 
 	var err error
+	t1, _ := os.LookupEnv("TEST")
+	test, err = strconv.ParseBool(t1)
+	if err != nil {
+		test = false
+	}
 	role, err = strconv.ParseBool(rl)
 	if err != nil {
 		log.Fatalln(err)
@@ -68,8 +75,11 @@ func main() {
 
 	var c1 grpc_util.PutLogClient
 	var c2 grpc_util.PutLogClient
+	var wg sync.WaitGroup = sync.WaitGroup{}
+
 	if !role {
-		go BackupServerLogRecServer()
+		wg.Add(1)
+		go BackupServerLogRecServer(&wg)
 	} else {
 		conn1, err := grpc.NewClient(address[0], grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
@@ -245,9 +255,15 @@ func main() {
 
 	//check the role of the node if it is master or backup
 	// if the node is master then we have
-	// if role {
-	router.Run()
-	// }
+	if role {
+		router.Run()
+	} else if test {
+		router.Run()
+	}
+
+	if !role {
+		wg.Wait()
+	}
 }
 
 type server struct {
@@ -274,7 +290,7 @@ func (s *server) PutOperation(ctx context.Context, in *grpc_util.Operation) (*gr
 	return &grpc_util.Status{Status: 0}, nil
 }
 
-func BackupServerLogRecServer() {
+func BackupServerLogRecServer(wg *sync.WaitGroup) {
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatalf("failed to listen to 50051 for grpc: %v", err)
