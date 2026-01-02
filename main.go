@@ -17,6 +17,7 @@ import (
 	grpc_util "simple_db/grpc"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/dgraph-io/badger/v4"
 	"github.com/gin-gonic/gin"
@@ -190,7 +191,12 @@ func main() {
 			return
 		}
 
-		res1, err := c1.PutOperation(context.Background(), &grpc_util.Operation{
+		ctx1, cancle1 := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancle1()
+
+		ctx2, cancle2 := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancle2()
+		res1, err := c1.PutOperation(ctx1, &grpc_util.Operation{
 			Key:   data.Key,
 			Value: string(d),
 		})
@@ -204,7 +210,7 @@ func main() {
 			return
 		}
 
-		res2, err := c2.PutOperation(context.Background(), &grpc_util.Operation{
+		res2, err := c2.PutOperation(ctx2, &grpc_util.Operation{
 			Key:   data.Key,
 			Value: string(d),
 		})
@@ -239,9 +245,9 @@ func main() {
 
 	//check the role of the node if it is master or backup
 	// if the node is master then we have
-	if role {
-		router.Run()
-	}
+	// if role {
+	router.Run()
+	// }
 }
 
 type server struct {
@@ -252,11 +258,9 @@ func (s *server) PutOperation(ctx context.Context, in *grpc_util.Operation) (*gr
 	// to test if the setup is working in syncronous way uncomment the following line
 	// what you should expect is that until the backup server do not write the data in the data base and respond with success the master won't write it
 	// return &grpc_util.Status{Status: 1}, nil
-	d, err := json.Marshal(in.GetValue())
-	if err != nil {
-		return &grpc_util.Status{Status: 1}, nil
-	}
-	err = db.Update(func(txn *badger.Txn) error {
+	var d []byte = []byte(in.GetValue())
+
+	err := db.Update(func(txn *badger.Txn) error {
 		err := txn.Set([]byte(in.GetKey()), d)
 		if err != nil {
 			return err
