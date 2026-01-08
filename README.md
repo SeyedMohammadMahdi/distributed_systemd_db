@@ -6,7 +6,7 @@ this project is a simple key-value database.
 
 ## news
 - added replication
-
+- added abort so that if one of replicas fails the others roll back the operation. in this project as we have adding to data base it just removes the record
 ## project overview 
 
 this project contains 3 routes:
@@ -46,6 +46,11 @@ running the container:
 ```bash
 docker compose up
 ```
+or just use this:
+```bash
+make run
+```
+- this command first build the image and then runs the containers
 
 and there you go. you have a simple database.
 
