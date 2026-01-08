@@ -19,14 +19,20 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
+	PutLog_Ready_FullMethodName        = "/grpc_util.PutLog/Ready"
 	PutLog_PutOperation_FullMethodName = "/grpc_util.PutLog/PutOperation"
+	PutLog_Abort_FullMethodName        = "/grpc_util.PutLog/Abort"
+	PutLog_Ask_FullMethodName          = "/grpc_util.PutLog/Ask"
 )
 
 // PutLogClient is the client API for PutLog service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PutLogClient interface {
+	Ready(ctx context.Context, in *M, opts ...grpc.CallOption) (*Status, error)
 	PutOperation(ctx context.Context, in *Operation, opts ...grpc.CallOption) (*Status, error)
+	Abort(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Status, error)
+	Ask(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Status, error)
 }
 
 type putLogClient struct {
@@ -35,6 +41,16 @@ type putLogClient struct {
 
 func NewPutLogClient(cc grpc.ClientConnInterface) PutLogClient {
 	return &putLogClient{cc}
+}
+
+func (c *putLogClient) Ready(ctx context.Context, in *M, opts ...grpc.CallOption) (*Status, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Status)
+	err := c.cc.Invoke(ctx, PutLog_Ready_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *putLogClient) PutOperation(ctx context.Context, in *Operation, opts ...grpc.CallOption) (*Status, error) {
@@ -47,11 +63,34 @@ func (c *putLogClient) PutOperation(ctx context.Context, in *Operation, opts ...
 	return out, nil
 }
 
+func (c *putLogClient) Abort(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Status, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Status)
+	err := c.cc.Invoke(ctx, PutLog_Abort_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *putLogClient) Ask(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Status, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Status)
+	err := c.cc.Invoke(ctx, PutLog_Ask_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PutLogServer is the server API for PutLog service.
 // All implementations must embed UnimplementedPutLogServer
 // for forward compatibility.
 type PutLogServer interface {
+	Ready(context.Context, *M) (*Status, error)
 	PutOperation(context.Context, *Operation) (*Status, error)
+	Abort(context.Context, *Id) (*Status, error)
+	Ask(context.Context, *Id) (*Status, error)
 	mustEmbedUnimplementedPutLogServer()
 }
 
@@ -62,8 +101,17 @@ type PutLogServer interface {
 // pointer dereference when methods are called.
 type UnimplementedPutLogServer struct{}
 
+func (UnimplementedPutLogServer) Ready(context.Context, *M) (*Status, error) {
+	return nil, status.Error(codes.Unimplemented, "method Ready not implemented")
+}
 func (UnimplementedPutLogServer) PutOperation(context.Context, *Operation) (*Status, error) {
 	return nil, status.Error(codes.Unimplemented, "method PutOperation not implemented")
+}
+func (UnimplementedPutLogServer) Abort(context.Context, *Id) (*Status, error) {
+	return nil, status.Error(codes.Unimplemented, "method Abort not implemented")
+}
+func (UnimplementedPutLogServer) Ask(context.Context, *Id) (*Status, error) {
+	return nil, status.Error(codes.Unimplemented, "method Ask not implemented")
 }
 func (UnimplementedPutLogServer) mustEmbedUnimplementedPutLogServer() {}
 func (UnimplementedPutLogServer) testEmbeddedByValue()                {}
@@ -86,6 +134,24 @@ func RegisterPutLogServer(s grpc.ServiceRegistrar, srv PutLogServer) {
 	s.RegisterService(&PutLog_ServiceDesc, srv)
 }
 
+func _PutLog_Ready_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(M)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PutLogServer).Ready(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PutLog_Ready_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PutLogServer).Ready(ctx, req.(*M))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PutLog_PutOperation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Operation)
 	if err := dec(in); err != nil {
@@ -104,6 +170,42 @@ func _PutLog_PutOperation_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PutLog_Abort_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Id)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PutLogServer).Abort(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PutLog_Abort_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PutLogServer).Abort(ctx, req.(*Id))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PutLog_Ask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Id)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PutLogServer).Ask(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PutLog_Ask_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PutLogServer).Ask(ctx, req.(*Id))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PutLog_ServiceDesc is the grpc.ServiceDesc for PutLog service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -112,8 +214,20 @@ var PutLog_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*PutLogServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "Ready",
+			Handler:    _PutLog_Ready_Handler,
+		},
+		{
 			MethodName: "PutOperation",
 			Handler:    _PutLog_PutOperation_Handler,
+		},
+		{
+			MethodName: "Abort",
+			Handler:    _PutLog_Abort_Handler,
+		},
+		{
+			MethodName: "Ask",
+			Handler:    _PutLog_Ask_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

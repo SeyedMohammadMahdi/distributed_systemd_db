@@ -3,8 +3,11 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	grpc_util "simple_db/grpc"
+	"simple_db/operationlog"
+	"strconv"
 	"time"
 
 	"github.com/dgraph-io/badger/v4"
@@ -103,6 +106,16 @@ func PutObjectHandler(c1 *grpc_util.PutLogClient, c2 *grpc_util.PutLogClient) gi
 			return
 		}
 
+		opId := len(operationlog.OperationLogs)
+
+		opLog := operationlog.OperationLog{
+			Id:    strconv.Itoa(opId),
+			Key:   data.Key,
+			Value: data.Value,
+			Status: 0,
+		}
+
+		operationlog.OperationLogs = append(operationlog.OperationLogs, opLog)
 		d, err := json.Marshal(data.Value)
 
 		if err != nil {
@@ -115,6 +128,8 @@ func PutObjectHandler(c1 *grpc_util.PutLogClient, c2 *grpc_util.PutLogClient) gi
 
 		ctx2, cancle2 := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancle2()
+
+		
 
 		res1, err := (*c1).PutOperation(ctx1, &grpc_util.Operation{
 			Key:   data.Key,
@@ -160,5 +175,7 @@ func PutObjectHandler(c1 *grpc_util.PutLogClient, c2 *grpc_util.PutLogClient) gi
 		}
 
 		c.Status(http.StatusOK)
+
+		log.Println(operationlog.OperationLogs)
 	}
 }
