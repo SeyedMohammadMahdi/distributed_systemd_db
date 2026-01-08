@@ -88,11 +88,6 @@ func GetObjectHandler(c *gin.Context) {
 	})
 
 	if err == badger.ErrKeyNotFound {
-		// c.Status(http.StatusNotFound)
-		// c.JSON(http.StatusNotFound, gin.H{
-		// 	"message": "not found",
-		// 	"id": id,
-		// })
 		c.Status(http.StatusNotFound)
 		return
 	}
@@ -129,7 +124,7 @@ func PutObjectHandler(c1 *grpc_util.PutLogClient, c2 *grpc_util.PutLogClient) gi
 			c.Status(http.StatusConflict)
 			return
 		}
-
+		time.Sleep(20 * time.Second)
 		replicated := replicate_operation(c1, c2, data.Key, string(d), &opLog)
 
 		if !replicated {
@@ -204,11 +199,15 @@ func replicate_operation(c1 *grpc_util.PutLogClient, c2 *grpc_util.PutLogClient,
 	})
 	if err != nil {
 		// c.Status(http.StatusConflict)
+		abort(c2, opLog.Id)
+		opLog.Status = 4
 		return false
 	}
 
 	if res1.GetStatus() != 0 {
 		// c.Status(http.StatusConflict)
+		abort(c2, opLog.Id)
+		opLog.Status = 4
 		return false
 	}
 
@@ -219,11 +218,24 @@ func replicate_operation(c1 *grpc_util.PutLogClient, c2 *grpc_util.PutLogClient,
 	})
 
 	if err != nil {
+		abort(c1, opLog.Id)
+		opLog.Status = 4
 		return false
 	}
 
 	if res2.GetStatus() != 0 {
+		abort(c1, opLog.Id)
+		opLog.Status = 4
 		return false
 	}
 	return true
+}
+
+func abort(c *grpc_util.PutLogClient, id string) {
+	ctx, cancle := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancle()
+
+	(*c).Abort(ctx, &grpc_util.Id{
+		Id: id,
+	})
 }

@@ -36,7 +36,7 @@ func (s *server) PutOperation(ctx context.Context, in *grpc_util.Operation) (*gr
 			Status: 1,
 		}, nil
 	}
-	
+
 	err := db.Update(func(txn *badger.Txn) error {
 		err := txn.Set([]byte(in.GetKey()), d)
 		if err != nil {
@@ -66,7 +66,7 @@ func (s *server) Ready(ctx context.Context, in *grpc_util.Id) (*grpc_util.Status
 }
 
 func (s *server) Abort(ctx context.Context, in *grpc_util.Id) (*grpc_util.Status, error) {
-
+	log.Println("aborting: ", in.GetId())
 	var op *operationlog.OperationLog = nil
 	id := in.GetId()
 	for _, item := range operationlog.OperationLogs {
