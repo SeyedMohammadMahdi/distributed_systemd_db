@@ -5,22 +5,20 @@ option go_package = "./grpc_util";
 package grpc_util;
 
 service PutLog {
-    rpc Ready (M) returns (Status) {} 
+    rpc Ready (Id) returns (Status) {} 
     rpc PutOperation (Operation) returns (Status) {}
     rpc Abort (Id) returns (Status) {}
     rpc Ask (Id) returns (Status) {}
 }
-
-message M {}
 
 message Id {
     string id = 1;
 }
 
 message Operation {
-
-    string key = 1;
-    string value = 2;
+    string Id = 1;
+    string key = 2;
+    string value = 3;
 }
 
 message Status {

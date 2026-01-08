@@ -123,70 +123,14 @@ func PutObjectHandler(c1 *grpc_util.PutLogClient, c2 *grpc_util.PutLogClient) gi
 			return
 		}
 
-		// readyctx1, readycancle1 := context.WithTimeout(context.Background(), 5*time.Second)
-		// defer readycancle1()
-		// readyctx2, readycancle2 := context.WithTimeout(context.Background(), 5*time.Second)
-		// defer readycancle2()
-
-		// readiness1, err := (*c1).Ready(readyctx1, &grpc_util.M{})
-
-		// if err != nil {
-		// 	c.Status(http.StatusConflict)
-		// 	log.Println(readiness1)
-		// 	return
-		// }
-
-		// readiness2, err := (*c2).Ready(readyctx2, &grpc_util.M{})
-
-		// if err != nil {
-		// 	c.Status(http.StatusConflict)
-		// 	log.Println(readiness2)
-		// 	return
-		// }
-
-		ready := check_readiness(c1, c2)
+		ready := check_readiness(c1, c2, &opLog)
 
 		if !ready {
 			c.Status(http.StatusConflict)
 			return
 		}
 
-		// ctx1, cancle1 := context.WithTimeout(context.Background(), 5*time.Second)
-		// defer cancle1()
-
-		// ctx2, cancle2 := context.WithTimeout(context.Background(), 5*time.Second)
-		// defer cancle2()
-
-		// res1, err := (*c1).PutOperation(ctx1, &grpc_util.Operation{
-		// 	Key:   data.Key,
-		// 	Value: string(d),
-		// })
-		// if err != nil {
-		// 	c.Status(http.StatusConflict)
-		// 	return
-		// }
-
-		// if res1.GetStatus() != 0 {
-		// 	c.Status(http.StatusConflict)
-		// 	return
-		// }
-
-		// res2, err := (*c2).PutOperation(ctx2, &grpc_util.Operation{
-		// 	Key:   data.Key,
-		// 	Value: string(d),
-		// })
-
-		// if err != nil {
-		// 	c.Status(http.StatusConflict)
-		// 	return
-		// }
-
-		// if res2.GetStatus() != 0 {
-		// 	c.Status(http.StatusConflict)
-		// 	return
-		// }
-
-		replicated := replicate_operation(c1, c2, data.Key, string(d))
+		replicated := replicate_operation(c1, c2, data.Key, string(d), &opLog)
 
 		if !replicated {
 			c.Status(http.StatusConflict)
@@ -215,20 +159,24 @@ func PutObjectHandler(c1 *grpc_util.PutLogClient, c2 *grpc_util.PutLogClient) gi
 	}
 }
 
-func check_readiness(c1 *grpc_util.PutLogClient, c2 *grpc_util.PutLogClient) bool {
+func check_readiness(c1 *grpc_util.PutLogClient, c2 *grpc_util.PutLogClient, opLog *operationlog.OperationLog) bool {
 	readyctx1, readycancle1 := context.WithTimeout(context.Background(), 5*time.Second)
 	defer readycancle1()
 	readyctx2, readycancle2 := context.WithTimeout(context.Background(), 5*time.Second)
 	defer readycancle2()
 
-	readiness1, err := (*c1).Ready(readyctx1, &grpc_util.M{})
+	readiness1, err := (*c1).Ready(readyctx1, &grpc_util.Id{
+		Id: opLog.Id,
+	})
 
 	if err != nil {
 		log.Println(readiness1)
 		return false
 	}
 
-	readiness2, err := (*c2).Ready(readyctx2, &grpc_util.M{})
+	readiness2, err := (*c2).Ready(readyctx2, &grpc_util.Id{
+		Id: opLog.Id,
+	})
 
 	if err != nil {
 		log.Println(readiness2)
@@ -242,7 +190,7 @@ func check_readiness(c1 *grpc_util.PutLogClient, c2 *grpc_util.PutLogClient) boo
 	return false
 }
 
-func replicate_operation(c1 *grpc_util.PutLogClient, c2 *grpc_util.PutLogClient, key string, value string) bool {
+func replicate_operation(c1 *grpc_util.PutLogClient, c2 *grpc_util.PutLogClient, key string, value string, opLog *operationlog.OperationLog) bool {
 	ctx1, cancle1 := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancle1()
 
@@ -250,6 +198,7 @@ func replicate_operation(c1 *grpc_util.PutLogClient, c2 *grpc_util.PutLogClient,
 	defer cancle2()
 
 	res1, err := (*c1).PutOperation(ctx1, &grpc_util.Operation{
+		Id:    opLog.Id,
 		Key:   key,
 		Value: value,
 	})
@@ -264,6 +213,7 @@ func replicate_operation(c1 *grpc_util.PutLogClient, c2 *grpc_util.PutLogClient,
 	}
 
 	res2, err := (*c2).PutOperation(ctx2, &grpc_util.Operation{
+		Id:    opLog.Id,
 		Key:   key,
 		Value: value,
 	})

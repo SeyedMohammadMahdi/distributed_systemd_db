@@ -21,42 +21,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type M struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *M) Reset() {
-	*x = M{}
-	mi := &file_grpc_grpc_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *M) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*M) ProtoMessage() {}
-
-func (x *M) ProtoReflect() protoreflect.Message {
-	mi := &file_grpc_grpc_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use M.ProtoReflect.Descriptor instead.
-func (*M) Descriptor() ([]byte, []int) {
-	return file_grpc_grpc_proto_rawDescGZIP(), []int{0}
-}
-
 type Id struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -66,7 +30,7 @@ type Id struct {
 
 func (x *Id) Reset() {
 	*x = Id{}
-	mi := &file_grpc_grpc_proto_msgTypes[1]
+	mi := &file_grpc_grpc_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -78,7 +42,7 @@ func (x *Id) String() string {
 func (*Id) ProtoMessage() {}
 
 func (x *Id) ProtoReflect() protoreflect.Message {
-	mi := &file_grpc_grpc_proto_msgTypes[1]
+	mi := &file_grpc_grpc_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -91,7 +55,7 @@ func (x *Id) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Id.ProtoReflect.Descriptor instead.
 func (*Id) Descriptor() ([]byte, []int) {
-	return file_grpc_grpc_proto_rawDescGZIP(), []int{1}
+	return file_grpc_grpc_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Id) GetId() string {
@@ -103,15 +67,16 @@ func (x *Id) GetId() string {
 
 type Operation struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
-	Value         string                 `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=Id,proto3" json:"Id,omitempty"`
+	Key           string                 `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
+	Value         string                 `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Operation) Reset() {
 	*x = Operation{}
-	mi := &file_grpc_grpc_proto_msgTypes[2]
+	mi := &file_grpc_grpc_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -123,7 +88,7 @@ func (x *Operation) String() string {
 func (*Operation) ProtoMessage() {}
 
 func (x *Operation) ProtoReflect() protoreflect.Message {
-	mi := &file_grpc_grpc_proto_msgTypes[2]
+	mi := &file_grpc_grpc_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -136,7 +101,14 @@ func (x *Operation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Operation.ProtoReflect.Descriptor instead.
 func (*Operation) Descriptor() ([]byte, []int) {
-	return file_grpc_grpc_proto_rawDescGZIP(), []int{2}
+	return file_grpc_grpc_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *Operation) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
 }
 
 func (x *Operation) GetKey() string {
@@ -162,7 +134,7 @@ type Status struct {
 
 func (x *Status) Reset() {
 	*x = Status{}
-	mi := &file_grpc_grpc_proto_msgTypes[3]
+	mi := &file_grpc_grpc_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -174,7 +146,7 @@ func (x *Status) String() string {
 func (*Status) ProtoMessage() {}
 
 func (x *Status) ProtoReflect() protoreflect.Message {
-	mi := &file_grpc_grpc_proto_msgTypes[3]
+	mi := &file_grpc_grpc_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -187,7 +159,7 @@ func (x *Status) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Status.ProtoReflect.Descriptor instead.
 func (*Status) Descriptor() ([]byte, []int) {
-	return file_grpc_grpc_proto_rawDescGZIP(), []int{3}
+	return file_grpc_grpc_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Status) GetStatus() int64 {
@@ -201,17 +173,17 @@ var File_grpc_grpc_proto protoreflect.FileDescriptor
 
 const file_grpc_grpc_proto_rawDesc = "" +
 	"\n" +
-	"\x0fgrpc/grpc.proto\x12\tgrpc_util\"\x03\n" +
-	"\x01M\"\x14\n" +
+	"\x0fgrpc/grpc.proto\x12\tgrpc_util\"\x14\n" +
 	"\x02Id\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"3\n" +
-	"\tOperation\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value\" \n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"C\n" +
+	"\tOperation\x12\x0e\n" +
+	"\x02Id\x18\x01 \x01(\tR\x02Id\x12\x10\n" +
+	"\x03key\x18\x02 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x03 \x01(\tR\x05value\" \n" +
 	"\x06Status\x12\x16\n" +
-	"\x06status\x18\x01 \x01(\x03R\x06status2\xc7\x01\n" +
-	"\x06PutLog\x12*\n" +
-	"\x05Ready\x12\f.grpc_util.M\x1a\x11.grpc_util.Status\"\x00\x129\n" +
+	"\x06status\x18\x01 \x01(\x03R\x06status2\xc8\x01\n" +
+	"\x06PutLog\x12+\n" +
+	"\x05Ready\x12\r.grpc_util.Id\x1a\x11.grpc_util.Status\"\x00\x129\n" +
 	"\fPutOperation\x12\x14.grpc_util.Operation\x1a\x11.grpc_util.Status\"\x00\x12+\n" +
 	"\x05Abort\x12\r.grpc_util.Id\x1a\x11.grpc_util.Status\"\x00\x12)\n" +
 	"\x03Ask\x12\r.grpc_util.Id\x1a\x11.grpc_util.Status\"\x00B\rZ\v./grpc_utilb\x06proto3"
@@ -228,22 +200,21 @@ func file_grpc_grpc_proto_rawDescGZIP() []byte {
 	return file_grpc_grpc_proto_rawDescData
 }
 
-var file_grpc_grpc_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_grpc_grpc_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_grpc_grpc_proto_goTypes = []any{
-	(*M)(nil),         // 0: grpc_util.M
-	(*Id)(nil),        // 1: grpc_util.Id
-	(*Operation)(nil), // 2: grpc_util.Operation
-	(*Status)(nil),    // 3: grpc_util.Status
+	(*Id)(nil),        // 0: grpc_util.Id
+	(*Operation)(nil), // 1: grpc_util.Operation
+	(*Status)(nil),    // 2: grpc_util.Status
 }
 var file_grpc_grpc_proto_depIdxs = []int32{
-	0, // 0: grpc_util.PutLog.Ready:input_type -> grpc_util.M
-	2, // 1: grpc_util.PutLog.PutOperation:input_type -> grpc_util.Operation
-	1, // 2: grpc_util.PutLog.Abort:input_type -> grpc_util.Id
-	1, // 3: grpc_util.PutLog.Ask:input_type -> grpc_util.Id
-	3, // 4: grpc_util.PutLog.Ready:output_type -> grpc_util.Status
-	3, // 5: grpc_util.PutLog.PutOperation:output_type -> grpc_util.Status
-	3, // 6: grpc_util.PutLog.Abort:output_type -> grpc_util.Status
-	3, // 7: grpc_util.PutLog.Ask:output_type -> grpc_util.Status
+	0, // 0: grpc_util.PutLog.Ready:input_type -> grpc_util.Id
+	1, // 1: grpc_util.PutLog.PutOperation:input_type -> grpc_util.Operation
+	0, // 2: grpc_util.PutLog.Abort:input_type -> grpc_util.Id
+	0, // 3: grpc_util.PutLog.Ask:input_type -> grpc_util.Id
+	2, // 4: grpc_util.PutLog.Ready:output_type -> grpc_util.Status
+	2, // 5: grpc_util.PutLog.PutOperation:output_type -> grpc_util.Status
+	2, // 6: grpc_util.PutLog.Abort:output_type -> grpc_util.Status
+	2, // 7: grpc_util.PutLog.Ask:output_type -> grpc_util.Status
 	4, // [4:8] is the sub-list for method output_type
 	0, // [0:4] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -262,7 +233,7 @@ func file_grpc_grpc_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_grpc_grpc_proto_rawDesc), len(file_grpc_grpc_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

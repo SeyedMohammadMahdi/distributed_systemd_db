@@ -29,7 +29,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PutLogClient interface {
-	Ready(ctx context.Context, in *M, opts ...grpc.CallOption) (*Status, error)
+	Ready(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Status, error)
 	PutOperation(ctx context.Context, in *Operation, opts ...grpc.CallOption) (*Status, error)
 	Abort(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Status, error)
 	Ask(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Status, error)
@@ -43,7 +43,7 @@ func NewPutLogClient(cc grpc.ClientConnInterface) PutLogClient {
 	return &putLogClient{cc}
 }
 
-func (c *putLogClient) Ready(ctx context.Context, in *M, opts ...grpc.CallOption) (*Status, error) {
+func (c *putLogClient) Ready(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Status, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Status)
 	err := c.cc.Invoke(ctx, PutLog_Ready_FullMethodName, in, out, cOpts...)
@@ -87,7 +87,7 @@ func (c *putLogClient) Ask(ctx context.Context, in *Id, opts ...grpc.CallOption)
 // All implementations must embed UnimplementedPutLogServer
 // for forward compatibility.
 type PutLogServer interface {
-	Ready(context.Context, *M) (*Status, error)
+	Ready(context.Context, *Id) (*Status, error)
 	PutOperation(context.Context, *Operation) (*Status, error)
 	Abort(context.Context, *Id) (*Status, error)
 	Ask(context.Context, *Id) (*Status, error)
@@ -101,7 +101,7 @@ type PutLogServer interface {
 // pointer dereference when methods are called.
 type UnimplementedPutLogServer struct{}
 
-func (UnimplementedPutLogServer) Ready(context.Context, *M) (*Status, error) {
+func (UnimplementedPutLogServer) Ready(context.Context, *Id) (*Status, error) {
 	return nil, status.Error(codes.Unimplemented, "method Ready not implemented")
 }
 func (UnimplementedPutLogServer) PutOperation(context.Context, *Operation) (*Status, error) {
@@ -135,7 +135,7 @@ func RegisterPutLogServer(s grpc.ServiceRegistrar, srv PutLogServer) {
 }
 
 func _PutLog_Ready_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(M)
+	in := new(Id)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -147,7 +147,7 @@ func _PutLog_Ready_Handler(srv interface{}, ctx context.Context, dec func(interf
 		FullMethod: PutLog_Ready_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PutLogServer).Ready(ctx, req.(*M))
+		return srv.(PutLogServer).Ready(ctx, req.(*Id))
 	}
 	return interceptor(ctx, in, info, handler)
 }
