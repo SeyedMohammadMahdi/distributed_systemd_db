@@ -109,13 +109,13 @@ func PutObjectHandler(c1 *grpc_util.PutLogClient, c2 *grpc_util.PutLogClient) gi
 		opId := len(operationlog.OperationLogs)
 
 		opLog := operationlog.OperationLog{
-			Id:    strconv.Itoa(opId),
-			Key:   data.Key,
-			Value: data.Value,
+			Id:     strconv.Itoa(opId),
+			Key:    data.Key,
+			Value:  data.Value,
 			Status: 0,
 		}
 
-		operationlog.OperationLogs = append(operationlog.OperationLogs, opLog)
+		operationlog.OperationLogs = append(operationlog.OperationLogs, &opLog)
 		d, err := json.Marshal(data.Value)
 
 		if err != nil {
@@ -123,39 +123,72 @@ func PutObjectHandler(c1 *grpc_util.PutLogClient, c2 *grpc_util.PutLogClient) gi
 			return
 		}
 
-		ctx1, cancle1 := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancle1()
+		// readyctx1, readycancle1 := context.WithTimeout(context.Background(), 5*time.Second)
+		// defer readycancle1()
+		// readyctx2, readycancle2 := context.WithTimeout(context.Background(), 5*time.Second)
+		// defer readycancle2()
 
-		ctx2, cancle2 := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancle2()
+		// readiness1, err := (*c1).Ready(readyctx1, &grpc_util.M{})
 
-		
+		// if err != nil {
+		// 	c.Status(http.StatusConflict)
+		// 	log.Println(readiness1)
+		// 	return
+		// }
 
-		res1, err := (*c1).PutOperation(ctx1, &grpc_util.Operation{
-			Key:   data.Key,
-			Value: string(d),
-		})
-		if err != nil {
+		// readiness2, err := (*c2).Ready(readyctx2, &grpc_util.M{})
+
+		// if err != nil {
+		// 	c.Status(http.StatusConflict)
+		// 	log.Println(readiness2)
+		// 	return
+		// }
+
+		ready := check_readiness(c1, c2)
+
+		if !ready {
 			c.Status(http.StatusConflict)
 			return
 		}
 
-		if res1.GetStatus() != 0 {
-			c.Status(http.StatusConflict)
-			return
-		}
+		// ctx1, cancle1 := context.WithTimeout(context.Background(), 5*time.Second)
+		// defer cancle1()
 
-		res2, err := (*c2).PutOperation(ctx2, &grpc_util.Operation{
-			Key:   data.Key,
-			Value: string(d),
-		})
+		// ctx2, cancle2 := context.WithTimeout(context.Background(), 5*time.Second)
+		// defer cancle2()
 
-		if err != nil {
-			c.Status(http.StatusConflict)
-			return
-		}
+		// res1, err := (*c1).PutOperation(ctx1, &grpc_util.Operation{
+		// 	Key:   data.Key,
+		// 	Value: string(d),
+		// })
+		// if err != nil {
+		// 	c.Status(http.StatusConflict)
+		// 	return
+		// }
 
-		if res2.GetStatus() != 0 {
+		// if res1.GetStatus() != 0 {
+		// 	c.Status(http.StatusConflict)
+		// 	return
+		// }
+
+		// res2, err := (*c2).PutOperation(ctx2, &grpc_util.Operation{
+		// 	Key:   data.Key,
+		// 	Value: string(d),
+		// })
+
+		// if err != nil {
+		// 	c.Status(http.StatusConflict)
+		// 	return
+		// }
+
+		// if res2.GetStatus() != 0 {
+		// 	c.Status(http.StatusConflict)
+		// 	return
+		// }
+
+		replicated := replicate_operation(c1, c2, data.Key, string(d))
+
+		if !replicated {
 			c.Status(http.StatusConflict)
 			return
 		}
@@ -175,7 +208,72 @@ func PutObjectHandler(c1 *grpc_util.PutLogClient, c2 *grpc_util.PutLogClient) gi
 		}
 
 		c.Status(http.StatusOK)
-
-		log.Println(operationlog.OperationLogs)
+		opLog.Id = "1000"
+		for _, item := range operationlog.OperationLogs {
+			log.Println(item.Id)
+		}
 	}
+}
+
+func check_readiness(c1 *grpc_util.PutLogClient, c2 *grpc_util.PutLogClient) bool {
+	readyctx1, readycancle1 := context.WithTimeout(context.Background(), 5*time.Second)
+	defer readycancle1()
+	readyctx2, readycancle2 := context.WithTimeout(context.Background(), 5*time.Second)
+	defer readycancle2()
+
+	readiness1, err := (*c1).Ready(readyctx1, &grpc_util.M{})
+
+	if err != nil {
+		log.Println(readiness1)
+		return false
+	}
+
+	readiness2, err := (*c2).Ready(readyctx2, &grpc_util.M{})
+
+	if err != nil {
+		log.Println(readiness2)
+		return false
+	}
+
+	if readiness1.GetStatus() == 0 && readiness2.GetStatus() == 0 {
+		return true
+	}
+
+	return false
+}
+
+func replicate_operation(c1 *grpc_util.PutLogClient, c2 *grpc_util.PutLogClient, key string, value string) bool {
+	ctx1, cancle1 := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancle1()
+
+	ctx2, cancle2 := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancle2()
+
+	res1, err := (*c1).PutOperation(ctx1, &grpc_util.Operation{
+		Key:   key,
+		Value: value,
+	})
+	if err != nil {
+		// c.Status(http.StatusConflict)
+		return false
+	}
+
+	if res1.GetStatus() != 0 {
+		// c.Status(http.StatusConflict)
+		return false
+	}
+
+	res2, err := (*c2).PutOperation(ctx2, &grpc_util.Operation{
+		Key:   key,
+		Value: value,
+	})
+
+	if err != nil {
+		return false
+	}
+
+	if res2.GetStatus() != 0 {
+		return false
+	}
+	return true
 }

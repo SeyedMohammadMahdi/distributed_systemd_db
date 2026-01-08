@@ -35,6 +35,13 @@ func (s *server) PutOperation(ctx context.Context, in *grpc_util.Operation) (*gr
 	return &grpc_util.Status{Status: 0}, nil
 }
 
+func (s *server) Ready(ctx context.Context, in *grpc_util.M) (*grpc_util.Status, error) {
+	log.Println("replica_1 is ready...")
+	return &grpc_util.Status{
+		Status: 0,
+	}, nil
+}
+
 func BackupServerLogRecServer(wg *sync.WaitGroup) {
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
