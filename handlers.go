@@ -124,7 +124,7 @@ func PutObjectHandler(c1 *grpc_util.PutLogClient, c2 *grpc_util.PutLogClient) gi
 			c.Status(http.StatusConflict)
 			return
 		}
-		time.Sleep(20 * time.Second)
+		// time.Sleep(20 * time.Second) ---- used for testing one node failure
 		replicated := replicate_operation(c1, c2, data.Key, string(d), &opLog)
 
 		if !replicated {
